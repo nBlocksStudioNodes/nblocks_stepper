@@ -1,0 +1,77 @@
+{
+    "category": "Display",
+    "name": "MAX7219PSU",
+    "inputs": 2,
+    "outputs": 0,
+    "parameters": [
+        {
+            "name": "MOSI",
+            "type": "raw",
+            "default": "p5",
+            "options": [
+                ""
+            ],
+            "value": "p5"
+        },
+        {
+            "name": "MISO",
+            "type": "raw",
+            "default": "p6",
+            "options": [
+                ""
+            ],
+            "value": "p6"
+        },
+        {
+            "name": "SCK",
+            "type": "raw",
+            "default": "p7",
+            "options": [
+                ""
+            ],
+            "value": "p7"
+        },
+        {
+            "name": "CS",
+            "type": "raw",
+            "default": "p8",
+            "options": [
+                ""
+            ],
+            "value": "p8"
+        },
+        {
+            "name": "Brightness",
+            "type": "int",
+            "default": 8,
+            "options": [
+                ""
+            ],
+            "value": 8
+        },
+        {
+            "name": "ScanLimit",
+            "type": "int",
+            "default": 7,
+            "options": [
+                ""
+            ],
+            "value": 7
+        }
+    ],
+    "labels": {
+        "input": [],
+        "output": []
+    },
+    "schematic_pins": {
+        "inputs": [
+            1,
+            2
+        ],
+        "outputs": [
+            0
+        ]
+    },
+    "repository": "https://github.com/nBlocksStudioNodes/nblocks_max7219psu",
+    "revision": ""
+}
