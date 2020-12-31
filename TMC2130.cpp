@@ -40,10 +40,10 @@ void nBlock_TMC2130::TMC2130_write1(uint16_t Value1) {
     dig[1] = (Value1 - dig[3] * 1000 - dig[2] * 100) / 10;
     dig[0] = (Value1 - dig[3] * 1000 - dig[2] * 100 - dig[1] * 10);
     // Send digit values to TMC2130
-    spi_write_2bytes(0x01, dig[3]);         //digit 0 
-    spi_write_2bytes(0x02, dig[2]);         //digit 1 
-    spi_write_2bytes(0x03, dig[1]);         //digit 2 has active the decimal point
-    spi_write_2bytes(0x04, dig[0]);         //digit 3 
+    write_TMC2130(0x01, dig[3]);         //digit 0 
+    write_TMC2130(0x02, dig[2]);         //digit 1 
+    write_TMC2130(0x03, dig[1]);         //digit 2 has active the decimal point
+    write_TMC2130(0x04, dig[0]);         //digit 3 
 }
 
 void nBlock_TMC2130::TMC2130_write2(uint16_t Value2) {
@@ -53,38 +53,46 @@ void nBlock_TMC2130::TMC2130_write2(uint16_t Value2) {
     dig[5] = (Value2 - dig[7] * 1000 - dig[6] * 100) / 10;
     dig[4] = (Value2 - dig[7] * 1000 - dig[6] * 100 - dig[5] * 10);
     // Send digit values to TMC2130
-    spi_write_2bytes(0x05, dig[7]);         //digit 0 
-    spi_write_2bytes(0x06, dig[6]);         //digit 1 
-    spi_write_2bytes(0x07, dig[5]);         //digit 2 has active the decimal point
-    spi_write_2bytes(0x08, dig[4]);         //digit 3 
+    write_TMC2130(0x05, dig[7]);         //digit 0 
+    write_TMC2130(0x06, dig[6]);         //digit 1 
+    write_TMC2130(0x07, dig[5]);         //digit 2 has active the decimal point
+    write_TMC2130(0x08, dig[4]);         //digit 3 
 }
 
 
-void nBlock_TMC2130::spi_write_2bytes(unsigned char MSB, unsigned char LSB) {
+void nBlock_TMC2130::write_TMC2130(uint8_t cmd, uint32_t data) {
     _cs = 0;                         // Set CS Low
-    _spi.write(MSB);                 // Send two bytes
-    _spi.write(LSB);
+    _spi.write(cmd);                 // Send address
+    _spi.write((data>>24UL)&0xFF)&0xFF;
+    _spi.write((data>>16UL)&0xFF)&0xFF;
+    _spi.write((data>> 8UL)&0xFF)&0xFF;
+    _spi.write((data>> 0UL)&0xFF)&0xFF;
     _cs = 1;                         // Set CS High
 }
 
-void nBlock_TMC2130::init_TMC2130(uint16_t Brightness, uint16_t ScanLimit) {
+
+uint8_t nBlock_TMC2130::read_TMC2130(uint8_t cmd, uint32_t *data) {
+    
+    uint8_t s;
+    write_TMC2130(cmd, 0UL);         //set read address
+    _cs = 0;                         // Set CS Low   
+    s     = _spi.write(cmd);
+    *data = _spi.write(0x00)&0xFF;
+    *data <<=8;
+    *data = _spi.write(0x00)&0xFF;
+    *data <<=8;
+    *data = _spi.write(0x00)&0xFF;
+    *data <<=8;
+    *data = _spi.write(0x00)&0xFF;
+    *data <<=8;            
+    _cs = 1;                         // Set CS High
+    return s;
+}
+
+void nBlock_TMC2130::init_TMC2130(uint8_t cmd, uint32_t data) {
     _cs = 1;                               // CS initially High 
-    spi_write_2bytes(0x09, 0xFF);         // Decoding off //nikos changed to full decode
-    spi_write_2bytes(0x0A, Brightness);         // Brightness to intermediate
-    spi_write_2bytes(0x0B, ScanLimit);         // Scan limit 7th digit
-    spi_write_2bytes(0x0C, 0x01);         // Normal operation mode, this is the shutdown register
-    spi_write_2bytes(0x0F, 0x0F);         // Enable display test
-
-    //wait_us(500000);                   // 500 ms delay
-
-    spi_write_2bytes(0x01, 0x0F);         // Clear row 0.
-    spi_write_2bytes(0x02, 0x0F);         // Clear row 1.
-    spi_write_2bytes(0x03, 0x0F);         // Clear row 2.
-    spi_write_2bytes(0x04, 0x0F);         // Clear row 3.
-    spi_write_2bytes(0x05, 0x0F);         // Clear row 4.
-    spi_write_2bytes(0x06, 0x0F);         // Clear row 5.
-    spi_write_2bytes(0x07, 0x0F);         // Clear row 6.
-    spi_write_2bytes(0x08, 0x0F);         // Clear row 7.
-    spi_write_2bytes(0x0F, 0x08);         // Disable display test
+    write_TMC2130(WRITE_FLAG|REG_GCONF,      0x00000001UL); //voltage on AIN is current reference
+    write_TMC2130(WRITE_FLAG|REG_IHOLD_IRUN, 0x00001010UL); //IHOLD=0x10, IRUN=0x10
+    write_TMC2130(WRITE_FLAG|REG_CHOPCONF,   0x00008008UL); //native 256 microsteps, MRES=0, TBL=1=24, TOFF=8
 
 }

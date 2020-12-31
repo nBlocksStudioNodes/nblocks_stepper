@@ -1,8 +1,7 @@
 #ifndef __NB_TMC2130
 #define __NB_TMC2130
 
-// Note: You also have to connect GND, 5V/VIO and VM.
-//       A connection diagram can be found in the schematics.
+
 #define EN_PIN    7 //enable (CFG6)
 #define DIR_PIN   8 //direction
 #define STEP_PIN  9 //step
@@ -34,7 +33,7 @@ public:
 	void endFrame();
 	void TMC2130_write1(uint16_t Value1);
     void TMC2130_write2(uint16_t Value2);
-    void spi_write_2bytes(unsigned char MSB, unsigned char LSB);
+    void write_TMC2130(unsigned char MSB, unsigned char LSB);
     void init_TMC2130(uint16_t Brightness, uint16_t ScanLimit);
 
    
