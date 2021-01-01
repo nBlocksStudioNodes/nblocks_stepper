@@ -31,10 +31,9 @@ public:
     nBlock_TMC2130(PinName MOSI, PinName MISO, PinName SCK, PinName pinCS, uint16_t Brightness, uint16_t ScanLimit);
     void triggerInput(nBlocks_Message message);
 	void endFrame();
-	void TMC2130_write1(uint16_t Value1);
-    void TMC2130_write2(uint16_t Value2);
-    void write_TMC2130(unsigned char MSB, unsigned char LSB);
-    void init_TMC2130(uint16_t Brightness, uint16_t ScanLimit);
+	void write_TMC2130(uint8_t cmd, uint32_t data)
+    uint8_t read_TMC2130(uint8_t cmd, uint32_t *data)
+    void init_TMC2130(uint8_t cmd, uint32_t data)
 
    
 private:	
