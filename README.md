@@ -11,7 +11,7 @@ width = 300
 
 ----
 
->  *  Category:Motor
+>  *  Category: Motor
 >  *  HAL: mbed
 >  *  Tested: with LPC1768 and TMC2130 Silentstepstick
 >  *  Author: N. Chalikias
@@ -20,8 +20,12 @@ width = 300
 `EndSwitch` Input stops the movement automatically and captures/outputs the `endSwitchPosition` as a number of executed steps.  
 If TMC2130 driver is used, then Stall Detection and `StallPosition` reporting is supported by connecting TMC2130 DIAG1 pin to `EndSwitch` Input.
 
-### L298 compatibility
-For simple use-cases, the L298 commands are implemented as in the Input section below for input1 (Schematic pin 1).
+### Simple commands
+For simple use-cases, 4 commands are implemented as in the Input section below for input1 (Schematic pin 1). The same commands are implemented in the DC-Motor control Node [L298](https://github.com/nBlocksStudioNodes/nblocks_l298), so a use-case scenario can be implemented with DC or stepping motor, just changing the motor Node in the Design. Example:  
+```
+[Ticker]-->[Counter]-->[SilentSTEPPER] for stepping-motor
+[Ticker]-->[Counter]-->[L298]          for DC-Motor
+```
 
 ### Gcode commands
 For more complex use-cases, Gcodes G0 and G1 are implemeted for input 2 (Schematic pin 2).
@@ -37,8 +41,7 @@ The next endFrame, outputs the StallPosition to the Node output creating a stall
 Registers are accesed with 40bit SPI transactions, sending a 40 bit command and getting back 40 bit status.
 
 
-## Inputs
-
+## Input Connections
 ```
  * (Schematic pin 1) integer: Value
     * 0 or 0x30 STOP  
@@ -48,7 +51,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 * (Schematic pin 2) * string: Gcode string
 ```
 
-## Output
+## Output Connections
 ```
  *  (Schematic pin 2) 
     * int: `StallPossition` or `EndSwitchPosition`
