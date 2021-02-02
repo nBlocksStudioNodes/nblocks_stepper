@@ -1,5 +1,5 @@
-#ifndef __NB_TMC2130
-#define __NB_TMC2130
+#ifndef __NB_STEPPER
+#define __NB_STEPPER
 
 
 #define EN_PIN    7 //enable (CFG6)
@@ -11,7 +11,7 @@
 #define MISO_PIN 12 //SDO/MISO (ICSP: 1, Uno: 12, Mega: 50)
 #define SCK_PIN  13 //CLK/SCK  (ICSP: 3, Uno: 13, Mega: 52)
 
-// TMC2130 registers
+// STEPPER registers
 #define WRITE_FLAG     (1<<7) //write flag
 #define READ_FLAG      (0<<7) //read flag
 #define REG_GCONF      0x00
@@ -26,14 +26,14 @@
 
 #include "nworkbench.h"
 
-class nBlock_TMC2130: public nBlockSimpleNode<1> {
+class nBlock_STEPPER: public nBlockSimpleNode<1> {
 public:
-    nBlock_TMC2130(PinName MOSI, PinName MISO, PinName SCK, PinName pinCS, uint16_t Brightness, uint16_t ScanLimit);
+    nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName pinCS, uint16_t Brightness, uint16_t ScanLimit);
     void triggerInput(nBlocks_Message message);
 	void endFrame();
-	void write_TMC2130(uint8_t cmd, uint32_t data)
-    uint8_t read_TMC2130(uint8_t cmd, uint32_t *data)
-    void init_TMC2130(uint8_t cmd, uint32_t data)
+	void write_STEPPER(uint8_t cmd, uint32_t data)
+    uint8_t read_STEPPER(uint8_t cmd, uint32_t *data)
+    void init_STEPPER(uint8_t cmd, uint32_t data)
 
    
 private:	
