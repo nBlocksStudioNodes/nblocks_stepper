@@ -1,4 +1,5 @@
-#  SilentSTEPPER
+# SilentSTEPPER
+
 Control Node for Stepping Motor driver IC TMC2130 supporting Stall Detection. 
 
 <p align="center">
@@ -8,6 +9,8 @@ width = 300
 />
 </p>
  
+----
+
  *  Category:Motor
  *  HAL: mbed
  *  Tested: with LPC1768 and TMC2130 Silentstepstick
