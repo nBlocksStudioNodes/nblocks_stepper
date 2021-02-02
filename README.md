@@ -1,13 +1,13 @@
 # STEPPER
 
-Node for simple Stepping Motor Control. Will work with: SilentStepstick, StepStick, or a any Step/Dir driven Step Motor driver  
-
+Node for simple Stepping Motor Control. 
 <p align="center">
 <img
 src="img/01.PNG"
 width = 300
 />
 </p>
+Will work with: SilentStepstick, StepStick, or a any Step/Dir driven Step Motor driver  
 
 ----
 
@@ -27,10 +27,10 @@ For simple use-cases, 4 commands are implemented as in the Input section below f
 [Ticker]-->[Counter]-->[L298]          for DC-Motor
 ```
 
+<!-- pagebreak -->
+
 ### Gcode commands
 For more complex use-cases, Gcodes G0 and G1 are implemeted for input 2 (Schematic pin 2).
-
-<!-- pagebreak -->
 
 ### Stall Detection
 By configuring registers `TCOOLTHRS` and `GCONF`, the TMC2130 DIAG1 pin is set to signal the Stall condition. The microprocessor pin connected to TMC2130 STALL pin is configured to create an interrupt.  
@@ -60,7 +60,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 <!-- pagebreak -->
 
 
-## Parameters:
+## Node Parameters
 ```
  *  PinName:  pinMOSI 
  *  PinName:  pinMISO 
@@ -71,11 +71,12 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
  *  PinName:  pinENABLE
  *  PinName:  pinEndStop Connect to a microswitch or TMC2130 DIAG1 pin
  *  uint32_t: speedDefault
+ *  uint32_t: AccelerationDefault
  *  char8_t:  Axis the Node executes Gcode for (X,Y,Z,E,A,B,C,D)
  *  bool:     MC2130
 ```
 
-## Example:
+## Usage Example
 ```
 [Ticker]-->[Counter]-->(1)[SilentSTEPPER]
 ```
