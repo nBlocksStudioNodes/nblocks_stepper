@@ -1,10 +1,10 @@
 # STEPPER
 
-Node for simple Stepping Motor Control. 
+Node for simple to use, feature-rich, Stepping Motor Control. 
 <p align="center">
 <img
 src="img/01.PNG"
-width = 300
+width = 350
 />
 </p>
 Will work with: SilentStepstick, StepStick, or a any Step/Dir driven Step Motor driver  
@@ -17,8 +17,8 @@ Will work with: SilentStepstick, StepStick, or a any Step/Dir driven Step Motor 
 >  *  Author: N. Chalikias
 
 ## Implementation Details
-`EndSwitch` Input stops the movement automatically and captures/outputs the `endSwitchPosition` as a number of executed steps.  
-If TMC2130 driver is used, then Stall Detection and `StallPosition` reporting is supported by connecting TMC2130 DIAG1 pin to `EndSwitch` Input.
+`EndSwitch` Input stops the movement automatically and captures/outputs the `stopPosition` as a number of executed steps.  
+If TMC2130 driver is used, then Stall Detection and `stopPosition` reporting is supported by connecting TMC2130 DIAG1 pin to `EndSwitch` Input.
 
 ### Simple commands
 For simple use-cases, 4 commands are implemented as in the Input section below for input1 (Schematic pin 1). The same commands are implemented in the DC-Motor control Node [L298](https://github.com/nBlocksStudioNodes/nblocks_l298), so a use-case scenario can be implemented with DC or stepping motor, just changing the motor Node in the Design. Example:  
@@ -42,6 +42,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 
 
 ## Input Connections
+
 ```
  * (Schematic pin 1) integer: Value
     * 0 or 0x30 STOP  
@@ -52,6 +53,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 ```
 
 ## Output Connections
+
 ```
  *  (Schematic pin 2) 
     * int: `StallPossition` or `EndSwitchPosition`
@@ -61,6 +63,8 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 
 
 ## Node Parameters
+
+
 ```
  *  PinName:  pinMOSI 
  *  PinName:  pinMISO 
@@ -76,7 +80,10 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
  *  bool:     MC2130
 ```
 
+
 ## Usage Example
+
+
 ```
 [Ticker]-->[Counter]-->(1)[SilentSTEPPER]
 ```
