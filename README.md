@@ -8,7 +8,7 @@ src="img/01.PNG"
 width = 300
 />
 </p>
- 
+
 ----
 
  *  Category:Motor
@@ -32,7 +32,9 @@ The next endFrame, outputs the StallPosition to the Node output creating a stall
 ### Accessing TNC2130 Registers
 Registers are accesed with 40bit SPI transactions, sending a 40 bit command and getting back 40 bit status. 
 
+
 ## Input 
+
  * (Schematic pin 1) integer: Value
     * 0 or 0x30 STOP  IN1=0, IN2=0
     * 1 or 0x31 RIGHT IN1=1, IN2=0  STATE MACHINE: ACTIVATED ONLY IF IN STOP
@@ -44,6 +46,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
     * int: StallPossition
 
 ## Parameters:
+
  *  PinName: pinMOSI 
  *  PinName: pinMISO 
  *  PinName: pinSCK
@@ -52,10 +55,12 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
  *  PinName: pinDIR
  *  PinName: pinENABLE
  *  PinName: pinDIAG1
- *  uint32_t: speedDefault 
+ *  uint32_t: speedDefault
+ *  char8_t: Axis the Node executes Gcode for (X,Y,Z,E,A,B,C,D) 
 
 ## Example:
-[Ticker]-->[Counter]-->[StringFormat]-->[OLEDisplay]
+
+[Ticker]-->[Counter]-->[SilentSTEPPER]
 
 
 
