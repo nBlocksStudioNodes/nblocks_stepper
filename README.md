@@ -72,12 +72,12 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
  *  PinName:  pinSS
  *  PinName:  pinSTEP
  *  PinName:  pinDIR
- *  PinName:  pinENABLE
- *  PinName:  pinEndStop Connect to a microswitch or TMC2130 DIAG1 pin
- *  uint32_t: speedDefault
- *  uint32_t: AccelerationDefault
+ *  PinName:  pinEN
+ *  PinName:  pinStop Connect to a microswitch-end-Stop or TMC2130 DIAG1 pin
+ *  uint32_t: speed: The Default speed
+ *  uint32_t: Accel: The Default acceration
  *  char8_t:  Axis the Node executes Gcode for (X,Y,Z,E,A,B,C,D)
- *  bool:     MC2130
+ *  bool:     TMC2130
 ```
 
 
