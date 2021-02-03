@@ -32,10 +32,16 @@ For simple use-cases, 4 commands are implemented as in the Input section below f
 ### Gcode commands
 For more complex use-cases, Gcodes G0 and G1 are implemeted for input 2 (Schematic pin 2).
 
-### Stall Detection
-By configuring registers `TCOOLTHRS` and `GCONF`, the TMC2130 DIAG1 pin is set to signal the Stall condition. The microprocessor pin connected to TMC2130 STALL pin is configured to create an interrupt.  
-A Timer is set to the desired stepping frequency. A Timer ISR is attached to the Timer. The Timer_ISR pulses the STEP-Pin and increments a SteppingCounter. The DIAG1 Interrupt ISR Stops the Timer (this stops the movement) and Captures the SteppingCounter value to a StallPosition parameter.  
-The next endFrame, outputs the StallPosition to the Node output creating a stall event.
+### Motion impementation
+The SteppingCounter is set for the desired number of steps.
+A Motion_Timer is set to the desired stepping frequency. A Motion_Timer ISR is attached to the Motion_Timer. The Motion_Timer ISR pulses the pinSTEP for a single step and decrements the SteppingCounter by 1. When the SteppingCounter reaches value 0 the Motion_Timer is stopped and the motion stops
+
+### Stop_Detection
+The microprocessor pin assigned for pinSTOP *is connected to an endStop microswitch*, and  is configured to create an interrupt. The pinSTOP ISR stops the Timer (this stops the movement) and Captures the SteppingCounter value to a StopPosition parameter. The next endFrame, outputs the StopPosition to the Node output, creating a Stop event.
+
+### Stall_Detection
+By configuring tmc2130 registers `TCOOLTHRS` and `GCONF` via SPI, the TMC2130 DIAG1 pin is set to signal the Stall condition. The microprocessor pin assigned for pinSTOP is *connected to TMC2130 DIAG1 pin*. Then when the TMC2130 detects and signals a Stall, the responce is as in the Stop_Detection 
+ 
 
 ### Accessing TMC2130 Registers
 Registers are accesed with 40bit SPI transactions, sending a 40 bit command and getting back 40 bit status.
@@ -52,7 +58,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 * (Schematic pin 2) * string: Gcode string
 ```
 
-## Output Connections
+## Output Connections ##
 
 ```
  *  (Schematic pin 2) 
@@ -61,9 +67,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 
 <!-- pagebreak -->
 
-
-## Node Parameters
-
+## Node Parameters ##
 
 ```
  *  PinName:  pinMOSI 
@@ -73,16 +77,14 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
  *  PinName:  pinSTEP
  *  PinName:  pinDIR
  *  PinName:  pinEN
- *  PinName:  pinStop Connect to a microswitch-end-Stop or TMC2130 DIAG1 pin
+ *  PinName:  pinStop: Connect to a microswitch-end-Stop or TMC2130 DIAG1 pin
  *  uint32_t: speed: The Default speed
  *  uint32_t: Accel: The Default acceration
  *  char8_t:  Axis the Node executes Gcode for (X,Y,Z,E,A,B,C,D)
  *  bool:     TMC2130
 ```
 
-
-## Usage Example
-
+## Usage Example ##
 
 ```
 [Ticker]-->[Counter]-->(1)[SilentSTEPPER]
