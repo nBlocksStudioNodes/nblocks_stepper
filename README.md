@@ -23,8 +23,8 @@ If TMC2130 driver is used, then Stall Detection and `stopPosition` reporting is 
 ### Simple commands
 For simple use-cases, 4 commands are implemented as in the Input section below for input1 (Schematic pin 1). The same commands are implemented in the DC-Motor control Node [L298](https://github.com/nBlocksStudioNodes/nblocks_l298), so a use-case scenario can be implemented with DC or stepping motor, just changing the motor Node in the Design. Example:  
 ```
-[Ticker]-->[Counter]-->[SilentSTEPPER] for stepping-motor
-[Ticker]-->[Counter]-->[L298]          for DC-Motor
+[Ticker]-->[Counter]-->[STEPPER]  for stepping-motor
+[Ticker]-->[Counter]-->[L298]     for DC-Motor
 ```
 
 <!-- pagebreak -->
@@ -37,7 +37,7 @@ The SteppingCounter is set for the desired number of steps.
 A Motion_Timer is set to the desired stepping frequency. A Motion_Timer ISR is attached to the Motion_Timer. The Motion_Timer ISR pulses the pinSTEP for a single step and decrements the SteppingCounter by 1. When the SteppingCounter reaches value 0 the Motion_Timer is stopped and the motion stops
 
 ### Stop_Detection
-The microprocessor pin assigned for pinSTOP *is connected to an endStop microswitch*, and  is configured to create an interrupt. The pinSTOP ISR stops the Timer (this stops the movement) and Captures the SteppingCounter value to a StopPosition parameter. The next endFrame, outputs the StopPosition to the Node output, creating a Stop event.
+The microprocessor pin assigned for pinSTOP *is connected to an endStop microswitch*, and  is configured to create an interrupt. The pinSTOP ISR stops the Motion_Timer (this stops the movement) and Captures the SteppingCounter value to a StopPosition parameter. The next endFrame, outputs the StopPosition to the Node output, creating a Stop event.
 
 ### Stall_Detection
 By configuring tmc2130 registers `TCOOLTHRS` and `GCONF` via SPI, the TMC2130 DIAG1 pin is set to signal the Stall condition. The microprocessor pin assigned for pinSTOP is *connected to TMC2130 DIAG1 pin*. Then when the TMC2130 detects and signals a Stall, the responce is as in the Stop_Detection 
@@ -78,9 +78,9 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
  *  PinName:  pinDIR
  *  PinName:  pinEN
  *  PinName:  pinStop: Connect to a microswitch-end-Stop or TMC2130 DIAG1 pin
- *  uint32_t: speed: The Default speed
+ *  uint32_t: speed: The Default speed in ms/step (1--> 1KHz stepping freq)
  *  uint32_t: Accel: The Default acceration
- *  char8_t:  Axis the Node executes Gcode for (X,Y,Z,E,A,B,C,D)
+ *  char8_t:  Axis: Node executes Gcode -only- for a single axis: X,Y,Z,E,A,B,C, or D
  *  bool:     TMC2130
 ```
 
@@ -88,6 +88,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 
 ```
 [Ticker]-->[Counter]-->(1)[SilentSTEPPER]
+
 ```
 
 

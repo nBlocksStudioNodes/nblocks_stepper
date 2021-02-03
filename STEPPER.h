@@ -22,6 +22,10 @@
 #define REG_DCCTRL     0x6E
 #define REG_DRVSTATUS  0x6F
 
+#define MOTIONIDLE     0x00
+#define MOTIONACTIVE   0x01
+#define MOTIONCOMPLETE 0x02
+#define MOTIONHALT     0x03
 
 
 #include "nworkbench.h"
@@ -42,6 +46,10 @@ public:
 
     uint32_t    Position1;
     uint32_t    Position2;
+    Timer       _motion_tmr;
+    uint32_t    stopPosition;
+    uint32_t    SteppingCounter;
+    uint8_t     _state;
    
 private:	
     SPI         * _spi;
@@ -56,6 +64,9 @@ private:
     uint32_t    _accel;
     uint32_t    _axis;
     bool        _tmc2130;
+    Ticker  _motion_ticker;
+
+    InterruptIn  * _stopInt;
 };
 
 #endif

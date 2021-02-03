@@ -6,13 +6,17 @@ nBlock_STEPPER::nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName 
                                _step(pinSTEP), _dir(pinDIR), _en(pinEN), _stop(pinSTOP),         // instantiation so can use _en =1;
                                _speed(speed), _accel(accel), _axis(axis), _tmc2130 (TMC2130) {   
     
-    if (TMC2130) {                      // Have to check TMC2130 first, so need to use the 'new' operator ....
-        _spi = new (MOSI, MISO, SCK);   // ... since we can't instantiate _spi before the {
+    (this->_motion_ticker).attach(callback(this, &nBlock_STEPPER::_motion_tmrISR), 0.001*_speed); // Instantiate the _motion_timer
+
+    if (TMC2130) {                      // Have to check TMC2130 first, so need to use the 'new operator'....
+        _spi = new (MOSI, MISO, SCK);   // ... since we can't instantiate _spi and _ss before the { , like the rest of the functions.
         _spi->format(8,0);              // 8-bit format, mode 0,0
         _spi->frequency(1000000);       // SCLK = 1 MHz
-        _ss =  new (pinCS);             // instantiation with 'new' operator 
+        _ss =  new (pinCS);             // instantiation with 'new operator' 
         _ss -> write(1);                // use with pointer
-        init_TMC2130();
+        init_TMC2130();                 // Configure TMC2130 DIAG1 pin to be Stall detection output
+        _stopInt = new (pinSTOP);       // instantiation of the Interrupt with 'new operator' 
+        (this->_stopInt).rise(callback(this, &nBlock_STEPPER::stopISR)); // call rise function of the InterruptIn class to assign a callback to ISR
     }
 }
 
@@ -119,24 +123,48 @@ void nBlock_STEPPER::init_TMC2130() {
 }
 
 void nBlock_STEPPER::stop(void) {
-  	_in1 = OFF; 
-  	_in2 = OFF;
+	_en = 0;
+    _motion_tmr.stop();
+    _state = MOTIONHALT;    
 }
   
 void nBlock_STEPPER::turnLeft(void) {
-    _enable.write(0.95f);
-	_in1 = OFF;
-	_in2 = ON;      
+    _en  = 1;
+    _dir = 0;
+    SteppingCounter = 10000;
+    _state = MOTIONACTIVE;     
 }
  
 void nBlock_STEPPER::turnRight(void) {
-    _enable.write(0.95f);
-    _in1 = ON;
-    _in2 = OFF;   
+    _en  = 1;
+    _dir = 1;
+    SteppingCounter = 10000;
+    _state = MOTIONACTIVE;
+
 }
 
 void nBlock_STEPPER::brake(void) {
-    _enable.write(0.95f);
-    _in1 = ON;
-    _in2 = ON;   
+    _motion_tmr.stop();
+    _state = MOTIONBRAKE;    
+}
+
+void nBlock_STEPPER::stopISR() {
+    if(_state == MOTIONACTIVE){
+		_motion_tmr.stop();
+        stopPosition = SteppingCounter;
+        _state = MOTIONSTOP;
+	}
+}
+
+void nBlock_STEPPER::_motion_tmrISR() {
+    if(_state == MOTIONACTIVE){
+		_pinStep = 1;
+        wait_us(3);
+        _pinStep = 0;
+        SteppingCounter--;
+        if(SteppingCounter == 0) {
+            _motion_tmr.stop();
+            _state = MOTIONCOMPLETE;
+        }
+	}
 }
