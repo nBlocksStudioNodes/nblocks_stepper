@@ -40,7 +40,7 @@ A Motion_Timer is set to the desired stepping frequency. A Motion_Timer ISR is a
 The microprocessor pin assigned for pinSTOP *is connected to an endStop microswitch*, and  is configured to create an interrupt. The pinSTOP ISR stops the Motion_Timer (this stops the movement) and Captures the SteppingCounter value to a StopPosition parameter. The next endFrame, outputs the StopPosition to the Node output, creating a Stop event.
 
 ### Stall_Detection
-By configuring tmc2130 registers `TCOOLTHRS` and `GCONF` via SPI, the TMC2130 DIAG1 pin is set to signal the Stall condition. The microprocessor pin assigned for pinSTOP is *connected to TMC2130 DIAG1 pin*. Then when the TMC2130 detects and signals a Stall, the responce is as in the Stop_Detection 
+By configuring TMC2130 registers `TCOOLTHRS` and `GCONF` via SPI, the TMC2130 DIAG1 pin is set to signal the Stall condition. The microprocessor pin assigned for pinSTOP is *connected to TMC2130 DIAG1 pin*. Then when the TMC2130 detects and signals a Stall, the responce is as in the Stop_Detection 
  
 
 ### Accessing TMC2130 Registers
@@ -62,7 +62,7 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 
 ```
  *  (Schematic pin 2) 
-    * int: `StallPossition` or `EndSwitchPosition`
+    * int: `stopPosition'
 ```
 
 <!-- pagebreak -->
@@ -80,9 +80,10 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
  *  PinName:  pinStop: Connect to a microswitch-end-Stop or TMC2130 DIAG1 pin
  *  uint32_t: speed: The Default speed in ms/step (1--> 1KHz stepping freq)
  *  uint32_t: Accel: The Default acceration
- *  char8_t:  Axis: Node executes Gcode -only- for a single axis: X,Y,Z,E,A,B,C, or D
+ *  char8_t:  Axis: Node executes Gcode, [only for a single axis]: X,Y,Z,E,A,B,C, or D
  *  bool:     TMC2130
 ```
+
 
 ## Usage Example ##
 

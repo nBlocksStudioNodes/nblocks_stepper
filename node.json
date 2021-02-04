@@ -1,38 +1,38 @@
 {
-    "category": "Display",
-    "name": "MAX7219PSU",
+    "category": "Motor",
+    "name": "STEPPER",
     "inputs": 2,
-    "outputs": 0,
+    "outputs": 1,
     "parameters": [
         {
             "name": "MOSI",
             "type": "raw",
-            "default": "p5",
+            "default": "p11",
             "options": [
                 ""
             ],
-            "value": "p5"
+            "value": "p11"
         },
         {
             "name": "MISO",
             "type": "raw",
-            "default": "p6",
+            "default": "p12",
             "options": [
                 ""
             ],
-            "value": "p6"
+            "value": "p12"
         },
         {
             "name": "SCK",
             "type": "raw",
-            "default": "p7",
+            "default": "p13",
             "options": [
                 ""
             ],
-            "value": "p7"
+            "value": "p13"
         },
         {
-            "name": "CS",
+            "name": "SS",
             "type": "raw",
             "default": "p8",
             "options": [
@@ -41,22 +41,85 @@
             "value": "p8"
         },
         {
-            "name": "Brightness",
-            "type": "int",
-            "default": 8,
+            "name": "pinSTEP",
+            "type": "raw",
+            "default": "p26",
             "options": [
                 ""
             ],
-            "value": 8
+            "value": "p26"
         },
         {
-            "name": "ScanLimit",
-            "type": "int",
-            "default": 7,
+            "name": "pinDIR",
+            "type": "raw",
+            "default": "p29",
             "options": [
                 ""
             ],
-            "value": 7
+            "value": "p29"
+        },
+        {
+            "name": "pinEN",
+            "type": "raw",
+            "default": "p30",
+            "options": [
+                ""
+            ],
+            "value": "p30"
+        },
+        {
+            "name": "pinSTOP",
+            "type": "raw",
+            "default": "p25",
+            "options": [
+                ""
+            ],
+            "value": "p25"
+        },
+        {
+            "name": "speed",
+            "type": "raw",
+            "default": "100",
+            "options": [
+                ""
+            ],
+            "value": "100"
+        },
+        {
+            "name": "accel",
+            "type": "raw",
+            "default": "10",
+            "options": [
+                ""
+            ],
+            "value": "10"
+        },
+        {
+            "name": "Axis",
+            "type": "option",
+            "default": "Hello world!\\n",
+            "options": [
+                "X\r",
+                "Y\r",
+                "Z\r",
+                "E\r",
+                "A\r",
+                "B\r",
+                "C\r",
+                "D\r",
+                "\r",
+                ""
+            ],
+            "value": "Hello world!\\n"
+        },
+        {
+            "name": "TMC2130",
+            "type": "bool",
+            "default": 0,
+            "options": [
+                ""
+            ],
+            "value": 0
         }
     ],
     "labels": {
@@ -69,9 +132,9 @@
             2
         ],
         "outputs": [
-            0
+            3
         ]
     },
-    "repository": "https://github.com/nBlocksStudioNodes/nblocks_max7219psu",
+    "repository": "https://github.com/nBlocksStudioNodes/nblocks_stepper",
     "revision": ""
 }
