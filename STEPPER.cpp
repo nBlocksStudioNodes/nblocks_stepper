@@ -2,11 +2,13 @@
 
 nBlock_STEPPER::nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName pinSS, 
                                PinName pinSTEP, PinName pinDIR, PinName pinEN, PinName pinSTOP,
-                               uint32_t speed, uint32_t accel, uint8_t axis, bool TMC2130): 
+                               float speed, uint32_t accel, uint8_t axis, bool TMC2130): 
                                _step(pinSTEP), _dir(pinDIR), _en(pinEN), _stop(pinSTOP),         // instantiation so can use _en =1;
                                _speed(speed), _accel(accel), _axis(axis), _tmc2130 (TMC2130) {   
     
-    (this->_motion_ticker).attach(callback(this, &nBlock_STEPPER::_motion_tmrISR), 0.001*_speed); // Instantiate the _motion_timer
+    if(_speed < 0.00002) _speed = 0.00002;    // max 50KHz for Step pin frequency
+    if(_speed > 1.1) _speed = 1.0;            // min 1Hz
+    (this->_motion_ticker).attach(callback(this, &nBlock_STEPPER::_motion_tmrISR), _speed); // Instantiate the _motion_timer
 
     if (TMC2130) {                      // Have to check TMC2130 first, so need to use the 'new operator'....
         _spi = new SPI(MOSI, MISO, SCK);   // ... since we can't instantiate _spi and _ss before the { , like the rest of the functions.
@@ -131,14 +133,14 @@ void nBlock_STEPPER::stop(void) {
 void nBlock_STEPPER::turnLeft(void) {
     _en  = 1;
     _dir = 0;
-    SteppingCounter = 10000;
+    SteppingCounter = 1000000;  // 1000000/50KHz = 20sec of movement if the fastest speed is used
     _motion = MOTIONACTIVE;     
 }
  
 void nBlock_STEPPER::turnRight(void) {
     _en  = 1;
     _dir = 1;
-    SteppingCounter = 10000;
+    SteppingCounter = 1000000; // 1000000/50KHz = 20sec of movement if the fastest speed is used
     _motion = MOTIONACTIVE;
 
 }
@@ -158,8 +160,13 @@ void nBlock_STEPPER::stopISR() {
 
 void nBlock_STEPPER::_motion_tmrISR() {
     if(_motion == MOTIONACTIVE){
-		_step = 1;
-        wait_us(3);
+		_step = 1;      // 100ns pulse for a single command
+        _step = 1;      // 
+        _step = 1;      // 250ns pulse with 3 x commands
+        _step = 1;      // 
+        _step = 1;      // 
+        _step = 1;      // 600ns pulse with 6x commands, but compiler optimization might affect this
+        //wait_us(1);   // 7.5us pulse with wait_us(1)
         _step = 0;
         SteppingCounter--;
         if(SteppingCounter == 0) {

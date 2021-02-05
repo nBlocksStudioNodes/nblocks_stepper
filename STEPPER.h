@@ -36,7 +36,7 @@ class nBlock_STEPPER: public nBlockSimpleNode<1> {
 public:
     nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName pinSS, 
                                PinName pinSTEP, PinName pinDIR, PinName pinEN, PinName pinSTOP,
-                               uint32_t speed, uint32_t accel, uint8_t axis, bool TMC2130);
+                               float speed, uint32_t accel, uint8_t axis, bool TMC2130);
     void        triggerInput(nBlocks_Message message);
 	void        endFrame();
 
@@ -69,7 +69,7 @@ private:
     DigitalOut  _en;
     DigitalOut  _stop;
 
-	uint32_t    _speed;
+	float    _speed;
     uint32_t    _accel;
     uint32_t    _axis;
     bool        _tmc2130;

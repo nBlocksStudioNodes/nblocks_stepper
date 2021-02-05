@@ -79,7 +79,7 @@
         {
             "name": "speed",
             "type": "raw",
-            "default": "1",
+            "default": "0.001",
             "options": [
                 ""
             ],
@@ -97,20 +97,20 @@
         {
             "name": "Axis",
             "type": "option",
-            "default": "Hello world!\\n",
+            "default": "1",
             "options": [
-                "X\r",
-                "Y\r",
-                "Z\r",
-                "E\r",
-                "A\r",
-                "B\r",
-                "C\r",
-                "D\r",
+                "1\r",
+                "2\r",
+                "3\r",
+                "4\r",
+                "5\r",
+                "6\r",
+                "7\r",
+                "8\r",
                 "\r",
                 ""
             ],
-            "value": "Hello world!\\n"
+            "value": "1"
         },
         {
             "name": "TMC2130",

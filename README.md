@@ -70,25 +70,27 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 ## Node Parameters ##
 
 ```
- *  PinName:  pinMOSI 
- *  PinName:  pinMISO 
- *  PinName:  pinSCK
- *  PinName:  pinSS
- *  PinName:  pinSTEP
- *  PinName:  pinDIR
- *  PinName:  pinEN
- *  PinName:  pinStop: Connect to a microswitch-end-Stop or TMC2130 DIAG1 pin
- *  uint32_t: speed: The Default speed in ms/step (1--> 1KHz stepping freq)
- *  uint32_t: Accel: The Default acceration
- *  char8_t:  Axis: Node executes Gcode, [only for a single axis]: X,Y,Z,E,A,B,C, or D
- *  bool:     TMC2130
+ *  PinName: pinMOSI 
+ *  PinName: pinMISO 
+ *  PinName: pinSCK
+ *  PinName: pinSS
+ *  PinName: pinSTEP
+ *  PinName: pinDIR
+ *  PinName: pinEN
+ *  PinName: pinStop: Connect to a microswitch-end-Stop or TMC2130 DIAG1 pin
+ *  float:   speed: Default speed in s/step (0.001-->1KHz) limited to min 0.00002(50KHz), max 1 (1Hz)
+ *  uint32_t:Accel: The Default acceration
+ *  char8_t: Axis: Executes Gcode only for the specified axis: 1=X,2=Y,3=Z,4=E,5=A,6=B,7=C,8=D
+ *  bool:    TMC2130
 ```
 
 
 ## Usage Example ##
 
 ```
-[Ticker]-->[Counter]-->(1)[SilentSTEPPER]
+[Ticker]-->[Counter]-->(1)[SilentSTEPPER] simple motion demo
+
+[PC_Serial "G0 X100"]-->[StringSerial]-->(2)[SilentSTEPPER] executes Gcode
 
 ```
 
