@@ -2,21 +2,21 @@
 
 nBlock_STEPPER::nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName pinSS, 
                                PinName pinSTEP, PinName pinDIR, PinName pinEN, PinName pinSTOP,
-                               uint32_t speed, uint32_t accel, char8_t axis, bool TMC2130): 
+                               uint32_t speed, uint32_t accel, uint8_t axis, bool TMC2130): 
                                _step(pinSTEP), _dir(pinDIR), _en(pinEN), _stop(pinSTOP),         // instantiation so can use _en =1;
                                _speed(speed), _accel(accel), _axis(axis), _tmc2130 (TMC2130) {   
     
     (this->_motion_ticker).attach(callback(this, &nBlock_STEPPER::_motion_tmrISR), 0.001*_speed); // Instantiate the _motion_timer
 
     if (TMC2130) {                      // Have to check TMC2130 first, so need to use the 'new operator'....
-        _spi = new (MOSI, MISO, SCK);   // ... since we can't instantiate _spi and _ss before the { , like the rest of the functions.
+        _spi = new SPI(MOSI, MISO, SCK);   // ... since we can't instantiate _spi and _ss before the { , like the rest of the functions.
         _spi->format(8,0);              // 8-bit format, mode 0,0
         _spi->frequency(1000000);       // SCLK = 1 MHz
-        _ss =  new (pinCS);             // instantiation with 'new operator' 
-        _ss -> write(1);                // use with pointer
+        _ss =  new DigitalOut(pinSS);   // instantiation with 'new operator' 
+        _ss->write(1);                  // use with pointer
+        _stopInt = new InterruptIn(pinSTOP);       // instantiation of the Interrupt with 'new operator' 
+        _stopInt->rise(callback(this, &nBlock_STEPPER::stopISR)); // call rise function of the InterruptIn class to assign a callback to ISR
         init_TMC2130();                 // Configure TMC2130 DIAG1 pin to be Stall detection output
-        _stopInt = new (pinSTOP);       // instantiation of the Interrupt with 'new operator' 
-        (this->_stopInt).rise(callback(this, &nBlock_STEPPER::stopISR)); // call rise function of the InterruptIn class to assign a callback to ISR
     }
 }
 
@@ -36,37 +36,37 @@ void nBlock_STEPPER::endFrame(void){
 		Position1 = 0;
 
 		char buf[1];
-		buf[0] = received_value;
+		buf[0] = Value1;
 		switch (buf[0]) {
 			case 0:					// stop uncoditionally
-				state = 0;
+				_state = 0;
 				stop();
 				break;
 			case 0x30:				// stop uncoditionally
-				state = 0;
+				_state = 0;
 				stop();
 				break;				
 			case 1:
-				if (state == 0){	//move right only if is in stop
-					state = 1;
+				if (_state == 0){	//move right only if is in stop
+					_state = 1;
 					turnRight();
 					}
 				break;
 			case 0x31:
-				if (state == 0){	//move right only if is in stop
-					state = 1;
+				if (_state == 0){	//move right only if is in stop
+					_state = 1;
 					turnRight();
 					}
 				break;				
 			case 2:
-				if (state == 1){	//turn left only if moving right
-					state = 2;
+				if (_state == 1){	//turn left only if moving right
+					_state = 2;
 					turnLeft();
 					}
 				break;
 			case 0x32:
-				if (state == 1){	//turn left only if moving right
-					state = 2;
+				if (_state == 1){	//turn left only if moving right
+					_state = 2;
 					turnLeft();
 					}
 				break;				
@@ -93,14 +93,14 @@ void nBlock_STEPPER::write_TMC2130(uint8_t cmd, uint32_t data) {
     _spi->write((data>>16UL)&0xFF)&0xFF;
     _spi->write((data>> 8UL)&0xFF)&0xFF;
     _spi->write((data>> 0UL)&0xFF)&0xFF;
-    _ss = 1;                         // Set CS High
+    _ss->write(1);                         // Set CS High
 }
 
 uint8_t nBlock_STEPPER::read_TMC2130(uint8_t cmd, uint32_t *data) {
     
     uint8_t s;
-    write_STEPPER(cmd, 0UL);         //set read address
-    _ss = 0;                         // Set CS Low   
+    write_TMC2130(cmd, 0UL);         //set read address
+    _ss->write(0);                         // Set CS Low   
     s     = _spi->write(cmd);
     *data = _spi->write(0x00)&0xFF;
     *data <<=8;
@@ -110,16 +110,16 @@ uint8_t nBlock_STEPPER::read_TMC2130(uint8_t cmd, uint32_t *data) {
     *data <<=8;
     *data = _spi->write(0x00)&0xFF;
     *data <<=8;            
-    _ss = 1;                         // Set CS High
+    _ss->write(1);                         // Set CS High
     return s;
 }
 
 void nBlock_STEPPER::init_TMC2130() {
-    _ss = 1;                               // CS initially High 
+    _ss->write(1);                               // CS initially High 
 //  write_STEPPER(WRITE_FLAG|REG_GCONF,      0x00000001UL); //voltage on AIN is current reference 
-    write_STEPPER(WRITE_FLAG|REG_GCONF,      0x00000181UL); //AIN curr ref, diag0_error,diag1_stall,
-    write_STEPPER(WRITE_FLAG|REG_IHOLD_IRUN, 0x00001010UL); //IHOLD=0x10, IRUN=0x10
-    write_STEPPER(WRITE_FLAG|REG_CHOPCONF,   0x00008008UL); //native 256 microsteps, MRES=0, TBL1=24, TOFF=8
+    write_TMC2130(WRITE_FLAG|REG_GCONF,      0x00000181UL); //AIN curr ref, diag0_error,diag1_stall,
+    write_TMC2130(WRITE_FLAG|REG_IHOLD_IRUN, 0x00001010UL); //IHOLD=0x10, IRUN=0x10
+    write_TMC2130(WRITE_FLAG|REG_CHOPCONF,   0x00008008UL); //native 256 microsteps, MRES=0, TBL1=24, TOFF=8
 }
 
 void nBlock_STEPPER::stop(void) {
@@ -158,9 +158,9 @@ void nBlock_STEPPER::stopISR() {
 
 void nBlock_STEPPER::_motion_tmrISR() {
     if(_state == MOTIONACTIVE){
-		_pinStep = 1;
+		_step = 1;
         wait_us(3);
-        _pinStep = 0;
+        _step = 0;
         SteppingCounter--;
         if(SteppingCounter == 0) {
             _motion_tmr.stop();

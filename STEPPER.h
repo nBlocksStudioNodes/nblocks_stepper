@@ -26,13 +26,17 @@
 #define MOTIONACTIVE   0x01
 #define MOTIONCOMPLETE 0x02
 #define MOTIONHALT     0x03
+#define MOTIONBRAKE    0x04
+#define MOTIONSTOP     0x05
 
 
 #include "nworkbench.h"
 
 class nBlock_STEPPER: public nBlockSimpleNode<1> {
 public:
-    nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName pinCS, uint16_t Brightness, uint16_t ScanLimit);
+    nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName pinSS, 
+                               PinName pinSTEP, PinName pinDIR, PinName pinEN, PinName pinSTOP,
+                               uint32_t speed, uint32_t accel, uint8_t axis, bool TMC2130);
     void        triggerInput(nBlocks_Message message);
 	void        endFrame();
 
@@ -43,6 +47,8 @@ public:
 	void        turnRight(void);
 	void        turnLeft(void);
 	void        brake(void);
+    void        _motion_tmrISR();
+    void        stopISR();
 
     uint32_t    Position1;
     uint32_t    Position2;
@@ -50,11 +56,13 @@ public:
     uint32_t    stopPosition;
     uint32_t    SteppingCounter;
     uint8_t     _state;
+    char        Value1;
+    char        Value2;
    
 private:	
     SPI         * _spi;
 
-    DigitalOut  * _cs;
+    DigitalOut  * _ss;
     DigitalOut  _step;
     DigitalOut  _dir;
     DigitalOut  _en;
