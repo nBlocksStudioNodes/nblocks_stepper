@@ -125,46 +125,46 @@ void nBlock_STEPPER::init_TMC2130() {
 void nBlock_STEPPER::stop(void) {
 	_en = 0;
     _motion_tmr.stop();
-    _state = MOTIONHALT;    
+    _motion = MOTIONHALT;    
 }
   
 void nBlock_STEPPER::turnLeft(void) {
     _en  = 1;
     _dir = 0;
     SteppingCounter = 10000;
-    _state = MOTIONACTIVE;     
+    _motion = MOTIONACTIVE;     
 }
  
 void nBlock_STEPPER::turnRight(void) {
     _en  = 1;
     _dir = 1;
     SteppingCounter = 10000;
-    _state = MOTIONACTIVE;
+    _motion = MOTIONACTIVE;
 
 }
 
 void nBlock_STEPPER::brake(void) {
     _motion_tmr.stop();
-    _state = MOTIONBRAKE;    
+    _motion = MOTIONBRAKE;    
 }
 
 void nBlock_STEPPER::stopISR() {
-    if(_state == MOTIONACTIVE){
+    if(_motion == MOTIONACTIVE){
 		_motion_tmr.stop();
         stopPosition = SteppingCounter;
-        _state = MOTIONSTOP;
+        _motion = MOTIONSTOP;
 	}
 }
 
 void nBlock_STEPPER::_motion_tmrISR() {
-    if(_state == MOTIONACTIVE){
+    if(_motion == MOTIONACTIVE){
 		_step = 1;
         wait_us(3);
         _step = 0;
         SteppingCounter--;
         if(SteppingCounter == 0) {
             _motion_tmr.stop();
-            _state = MOTIONCOMPLETE;
+            _motion = MOTIONCOMPLETE;
         }
 	}
 }

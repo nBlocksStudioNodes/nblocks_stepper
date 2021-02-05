@@ -58,6 +58,7 @@ public:
     uint8_t     _state;
     char        Value1;
     char        Value2;
+    uint8_t     _motion;
    
 private:	
     SPI         * _spi;

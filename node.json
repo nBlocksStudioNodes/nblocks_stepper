@@ -79,7 +79,7 @@
         {
             "name": "speed",
             "type": "raw",
-            "default": "100",
+            "default": "1",
             "options": [
                 ""
             ],
