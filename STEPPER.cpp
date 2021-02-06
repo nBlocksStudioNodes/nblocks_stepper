@@ -81,7 +81,11 @@ void nBlock_STEPPER::endFrame(void){
 			case 0x33:				// brake unconditionally
 				brake();
 				break;				
-			default:				// any other input ignore
+			case 4:					// Allow Motion
+				_motion = MOTIONHALT;
+				break;
+            
+            default:				// any other input ignore
 				break;
 		}//switch
 
@@ -154,7 +158,7 @@ void nBlock_STEPPER::turnRight(void) {
 
 void nBlock_STEPPER::brake(void) {
     _motion_tmr.stop();
-     _motion = MOTIONBRAKE;    
+    if(_motion != MOTIONSTOP) _motion = MOTIONBRAKE;    
 }
 
 void nBlock_STEPPER::stopISR() {
