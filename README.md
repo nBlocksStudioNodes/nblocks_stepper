@@ -88,9 +88,11 @@ Registers are accesed with 40bit SPI transactions, sending a 40 bit command and 
 ## Usage Example ##
 
 ```
-[Ticker]-->[Counter]-->(1)[SilentSTEPPER] simple motion demo
+[GPIN]-->[ValueTrig]-->(1)[STEPPER]
 
-[PC_Serial "G0 X100"]-->[StringSerial]-->(2)[SilentSTEPPER] executes Gcode
+[Ticker]-->[Counter]-->(1)[STEPPER] simple motion demo
+
+[PC_Serial "G0 X100"]-->[StringSerial]-->(2)[STEPPER] executes Gcode
 
 ```
 

@@ -84,7 +84,7 @@ void nBlock_STEPPER::endFrame(void){
 			case 4:					// Allow Motion
 				_motion = MOTIONHALT;
 				break;
-            
+
             default:				// any other input ignore
 				break;
 		}//switch
@@ -93,6 +93,7 @@ void nBlock_STEPPER::endFrame(void){
 	if (Position2) {
 		Position2 = 0;
 	}	
+    
     if(_motion == MOTIONSTOP) {
         output[0] = stopPosition;
         available[0] = 1;
@@ -144,14 +145,14 @@ void nBlock_STEPPER::stop(void) {
 void nBlock_STEPPER::turnLeft(void) {
     _en  = 1;
     _dir = 0;
-    SteppingCounter = 1000000;  // 1000000/50KHz = 20sec of movement if the fastest speed is used
-    if(_motion != MOTIONSTOP) _motion = MOTIONACTIVE;     
+    SteppingCounter = 0;  // 1000000/50KHz = 20sec of movement if the fastest speed is used
+    if(_motion == MOTIONSTOP) _motion = MOTIONACTIVE;     
 }
  
 void nBlock_STEPPER::turnRight(void) {
     _en  = 1;
     _dir = 1;
-    SteppingCounter = 1000000; // 1000000/50KHz = 20sec of movement if the fastest speed is used
+    SteppingCounter = 0; // 1000000/50KHz = 20sec of movement if the fastest speed is used
     if(_motion != MOTIONSTOP) _motion = MOTIONACTIVE;
 
 }
@@ -179,8 +180,8 @@ void nBlock_STEPPER::_motion_tmrISR() {
         _step = 1;      // 600ns pulse with 6x commands, but compiler optimization might affect this
         //wait_us(1);   // 7.5us pulse with wait_us(1)
         _step = 0;
-        SteppingCounter--;
-        if(SteppingCounter == 0) {
+        SteppingCounter++;
+        if(SteppingCounter == distance) {
             _motion_tmr.stop();
             _motion = MOTIONCOMPLETE;
         }

@@ -59,6 +59,7 @@ public:
     char        Value1;
     char        Value2;
     uint8_t     _motion;
+    uint32_t    distance = 1000000;
    
 private:	
     SPI         * _spi;
