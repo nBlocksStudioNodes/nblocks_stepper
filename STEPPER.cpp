@@ -4,20 +4,23 @@ nBlock_STEPPER::nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName 
                                PinName pinSTEP, PinName pinDIR, PinName pinEN, PinName pinSTOP,
                                float speed, uint32_t accel, uint8_t axis, bool TMC2130): 
                                _step(pinSTEP), _dir(pinDIR), _en(pinEN), _stop(pinSTOP),         // instantiation so can use _en =1;
-                               _speed(speed), _accel(accel), _axis(axis), _tmc2130 (TMC2130) {   
+                               _speed(speed), _accel(accel), _axis(axis), _tmc2130(TMC2130) {   
     
     if(_speed < 0.00002) _speed = 0.00002;    // max 50KHz for Step pin frequency
     if(_speed > 1.1) _speed = 1.0;            // min 1Hz
     (this->_motion_ticker).attach(callback(this, &nBlock_STEPPER::_motion_tmrISR), _speed); // Instantiate the _motion_timer
 
+        _stopInt = new InterruptIn(pinSTOP);       // instantiation of the Interrupt with 'new operator' 
+        _stopInt->rise(callback(this, &nBlock_STEPPER::stopISR)); // call rise function of the InterruptIn class to assign a callback to ISR
+
+    
     if (TMC2130) {                      // Have to check TMC2130 first, so need to use the 'new operator'....
         _spi = new SPI(MOSI, MISO, SCK);   // ... since we can't instantiate _spi and _ss before the { , like the rest of the functions.
         _spi->format(8,0);              // 8-bit format, mode 0,0
         _spi->frequency(1000000);       // SCLK = 1 MHz
         _ss =  new DigitalOut(pinSS);   // instantiation with 'new operator' 
         _ss->write(1);                  // use with pointer
-        _stopInt = new InterruptIn(pinSTOP);       // instantiation of the Interrupt with 'new operator' 
-        _stopInt->rise(callback(this, &nBlock_STEPPER::stopISR)); // call rise function of the InterruptIn class to assign a callback to ISR
+
         init_TMC2130();                 // Configure TMC2130 DIAG1 pin to be Stall detection output
     }
 }
@@ -49,7 +52,7 @@ void nBlock_STEPPER::endFrame(void){
 				stop();
 				break;				
 			case 1:
-				if (_state == 0){	//move right only if is in stop
+				if ((_state == 0) & (_motion != MOTIONSTOP)){	//move right only if is in stop
 					_state = 1;
 					turnRight();
 					}
@@ -61,7 +64,7 @@ void nBlock_STEPPER::endFrame(void){
 					}
 				break;				
 			case 2:
-				if (_state == 1){	//turn left only if moving right
+				if ((_state == 1) & (_motion != MOTIONSTOP)) {	//turn left only if moving right
 					_state = 2;
 					turnLeft();
 					}
@@ -86,6 +89,10 @@ void nBlock_STEPPER::endFrame(void){
 	if (Position2) {
 		Position2 = 0;
 	}	
+    if(_motion == MOTIONSTOP) {
+        output[0] = stopPosition;
+        available[0] = 1;
+    }
 }
 
 void nBlock_STEPPER::write_TMC2130(uint8_t cmd, uint32_t data) {
@@ -127,27 +134,27 @@ void nBlock_STEPPER::init_TMC2130() {
 void nBlock_STEPPER::stop(void) {
 	_en = 0;
     _motion_tmr.stop();
-    _motion = MOTIONHALT;    
+    // _motion = MOTIONHALT;    
 }
   
 void nBlock_STEPPER::turnLeft(void) {
     _en  = 1;
     _dir = 0;
     SteppingCounter = 1000000;  // 1000000/50KHz = 20sec of movement if the fastest speed is used
-    _motion = MOTIONACTIVE;     
+    if(_motion != MOTIONSTOP) _motion = MOTIONACTIVE;     
 }
  
 void nBlock_STEPPER::turnRight(void) {
     _en  = 1;
     _dir = 1;
     SteppingCounter = 1000000; // 1000000/50KHz = 20sec of movement if the fastest speed is used
-    _motion = MOTIONACTIVE;
+    if(_motion != MOTIONSTOP) _motion = MOTIONACTIVE;
 
 }
 
 void nBlock_STEPPER::brake(void) {
     _motion_tmr.stop();
-    _motion = MOTIONBRAKE;    
+    if(_motion != MOTIONSTOP) _motion = MOTIONBRAKE;    
 }
 
 void nBlock_STEPPER::stopISR() {
