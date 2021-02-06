@@ -154,7 +154,7 @@ void nBlock_STEPPER::turnRight(void) {
 
 void nBlock_STEPPER::brake(void) {
     _motion_tmr.stop();
-    if(_motion != MOTIONSTOP) _motion = MOTIONBRAKE;    
+     _motion = MOTIONBRAKE;    
 }
 
 void nBlock_STEPPER::stopISR() {
