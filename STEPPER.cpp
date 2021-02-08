@@ -137,20 +137,20 @@ void nBlock_STEPPER::init_TMC2130() {
 }
 
 void nBlock_STEPPER::stop(void) {
-	_en = 0;
+	_en = 1;
     _motion_tmr.stop();
     // _motion = MOTIONHALT;    
 }
   
 void nBlock_STEPPER::turnLeft(void) {
-    _en  = 1;
+    _en  = 0;
     _dir = 0;
     SteppingCounter = 0;  // 1000000/50KHz = 20sec of movement if the fastest speed is used
     if(_motion == MOTIONSTOP) _motion = MOTIONACTIVE;     
 }
  
 void nBlock_STEPPER::turnRight(void) {
-    _en  = 1;
+    _en  = 0;
     _dir = 1;
     SteppingCounter = 0; // 1000000/50KHz = 20sec of movement if the fastest speed is used
     if(_motion != MOTIONSTOP) _motion = MOTIONACTIVE;
@@ -178,7 +178,7 @@ void nBlock_STEPPER::_motion_tmrISR() {
         _step = 1;      // 
         _step = 1;      // 
         _step = 1;      // 600ns pulse with 6x commands, but compiler optimization might affect this
-        //wait_us(1);   // 7.5us pulse with wait_us(1)
+        //wait_us(10);   // 7.5us pulse with wait_us(1)
         _step = 0;
         SteppingCounter++;
         if(SteppingCounter == distance) {
