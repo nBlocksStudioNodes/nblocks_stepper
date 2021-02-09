@@ -6,7 +6,7 @@ nBlock_STEPPER::nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName 
                                _step(pinSTEP), _dir(pinDIR), _en(pinEN), _stop(pinSTOP),         // instantiation so can use _en =1;
                                _speed(speed), _accel(accel), _axis(axis), _tmc2130(TMC2130) {   
     
-    if(_speed < 0.00002) _speed = 0.00002;    // max 50KHz for Step pin frequency
+    if(_speed < 0.00002) _speed = 0.00002;    // max 50KHz for Step pin frequency, LESS IS BLOCKING THE SYSTEM
     if(_speed > 1.1) _speed = 1.0;            // min 1Hz
     (this->_motion_ticker).attach(callback(this, &nBlock_STEPPER::_motion_tmrISR), _speed); // Instantiate the _motion_timer
 
@@ -16,7 +16,7 @@ nBlock_STEPPER::nBlock_STEPPER(PinName MOSI, PinName MISO, PinName SCK, PinName 
     
     if (TMC2130) {                      // Have to check TMC2130 first, so need to use the 'new operator'....
         _spi = new SPI(MOSI, MISO, SCK);   // ... since we can't instantiate _spi and _ss before the { , like the rest of the functions.
-        _spi->format(8,0);              // 8-bit format, mode 0,0
+        _spi->format(8,3);              // 8-bit format, mode 0,0
         _spi->frequency(1000000);       // SCLK = 1 MHz
         _ss =  new DigitalOut(pinSS);   // instantiation with 'new operator' 
         _ss->write(1);                  // use with pointer
@@ -100,23 +100,24 @@ void nBlock_STEPPER::endFrame(void){
     }
 }
 
-void nBlock_STEPPER::write_TMC2130(uint8_t cmd, uint32_t data) {
-    _ss ->write(0);                   // Set CS Low
-    _spi->write(cmd);                 // Send address
-    _spi->write((data>>24UL)&0xFF)&0xFF;
-    _spi->write((data>>16UL)&0xFF)&0xFF;
-    _spi->write((data>> 8UL)&0xFF)&0xFF;
-    _spi->write((data>> 0UL)&0xFF)&0xFF;
-    _ss->write(1);                         // Set CS High
+uint8_t nBlock_STEPPER::write_TMC2130(uint8_t reg, uint32_t data) {
+    uint8_t status;
+    _ss ->write(0);                         // Set SPI Select Low
+    status = _spi->write(reg);              // 40 bit Datagram, first     8 bits register-address, also returns status byte
+    _spi->write((data >> 24UL) & 0xFF);     // 4 transactions x 8 bits = 32 bits data
+    _spi->write((data >> 16UL) & 0xFF);
+    _spi->write((data >>  8UL) & 0xFF);
+    _spi->write((data >>  0UL) & 0xFF);
+    _ss->write(1); 
+    return status;                         // Set SPI Select High
 }
 
-uint8_t nBlock_STEPPER::read_TMC2130(uint8_t cmd, uint32_t *data) {
-    
-    uint8_t s;
-    write_TMC2130(cmd, 0UL);         //set read address
-    _ss->write(0);                         // Set CS Low   
-    s     = _spi->write(cmd);
-    *data = _spi->write(0x00)&0xFF;
+uint8_t nBlock_STEPPER::read_TMC2130(uint8_t reg, uint32_t *data) {  
+    uint8_t status;
+    //write_TMC2130(reg, 0UL);          //set read address ?? does not comply with datasheet
+    _ss->write(0);                      // Set CS Low   
+    status = _spi->write(reg);          // send the register-address and get 8 bit SPI status
+    *data = _spi->write(0x00)&0xFF;     // get 32 more bits to complete the 40 bit transaction
     *data <<=8;
     *data = _spi->write(0x00)&0xFF;
     *data <<=8;
@@ -125,15 +126,16 @@ uint8_t nBlock_STEPPER::read_TMC2130(uint8_t cmd, uint32_t *data) {
     *data = _spi->write(0x00)&0xFF;
     *data <<=8;            
     _ss->write(1);                         // Set CS High
-    return s;
+    return status;
 }
 
 void nBlock_STEPPER::init_TMC2130() {
     _ss->write(1);                               // CS initially High 
-//  write_STEPPER(WRITE_FLAG|REG_GCONF,      0x00000001UL); //voltage on AIN is current reference 
-    write_TMC2130(WRITE_FLAG|REG_GCONF,      0x00000181UL); //AIN curr ref, diag0_error,diag1_stall,
-    write_TMC2130(WRITE_FLAG|REG_IHOLD_IRUN, 0x00001010UL); //IHOLD=0x10, IRUN=0x10
-    write_TMC2130(WRITE_FLAG|REG_CHOPCONF,   0x00008008UL); //native 256 microsteps, MRES=0, TBL1=24, TOFF=8
+    //write_TMC2130(WRITE_FLAG|REG_THIGH,      0x0000FFFFUL); // 
+    write_TMC2130(WRITE_FLAG|REG_TCOOLTHRS,  0x0000004EUL); // 
+    write_TMC2130(WRITE_FLAG|REG_GCONF,      0x00002181UL); // AIN curr ref, diag0_error,diag1_stall,
+    write_TMC2130(WRITE_FLAG|REG_IHOLD_IRUN, 0x00001000UL); // IRUN 0x0000 TO 0x1F00,  IHOLD=0x00 TO 0x1F, 
+    write_TMC2130(WRITE_FLAG|REG_CHOPCONF,   0x02008008UL); // MRES=[0=256ustep, 1=128, 2=64, 3=32,4=16,5=8,6=6,7=2,8=FULLSTEP], TBL1=24, TOFF=8
 }
 
 void nBlock_STEPPER::stop(void) {

@@ -17,6 +17,8 @@
 #define REG_GCONF      0x00
 #define REG_GSTAT      0x01
 #define REG_IHOLD_IRUN 0x10
+#define REG_TCOOLTHRS      0x14
+#define REG_THIGH          0x15
 #define REG_CHOPCONF   0x6C
 #define REG_COOLCONF   0x6D
 #define REG_DCCTRL     0x6E
@@ -40,7 +42,7 @@ public:
     void        triggerInput(nBlocks_Message message);
 	void        endFrame();
 
-	void        write_TMC2130(uint8_t cmd, uint32_t data);
+	uint8_t        write_TMC2130(uint8_t cmd, uint32_t data);
     uint8_t     read_TMC2130 (uint8_t cmd, uint32_t *data);
     void        init_TMC2130 ();
     void        stop(void);
