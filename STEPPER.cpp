@@ -132,10 +132,12 @@ uint8_t nBlock_STEPPER::read_TMC2130(uint8_t reg, uint32_t *data) {
 void nBlock_STEPPER::init_TMC2130() {
     _ss->write(1);                               // CS initially High 
     //write_TMC2130(WRITE_FLAG|REG_THIGH,      0x0000FFFFUL); // 
-    write_TMC2130(WRITE_FLAG|REG_TCOOLTHRS,  0x0000004EUL); // 
-    write_TMC2130(WRITE_FLAG|REG_GCONF,      0x00002181UL); // AIN curr ref, diag0_error,diag1_stall,
+    write_TMC2130(WRITE_FLAG|REG_TCOOLTHRS,  0x0000007EUL); // 04E
+    write_TMC2130(WRITE_FLAG|REG_GCONF,      0x00002101UL); // AIN curr ref, diag0_error,diag1_stall,
     write_TMC2130(WRITE_FLAG|REG_IHOLD_IRUN, 0x00001000UL); // IRUN 0x0000 TO 0x1F00,  IHOLD=0x00 TO 0x1F, 
     write_TMC2130(WRITE_FLAG|REG_CHOPCONF,   0x02008008UL); // MRES=[0=256ustep, 1=128, 2=64, 3=32,4=16,5=8,6=6,7=2,8=FULLSTEP], TBL1=24, TOFF=8
+    write_TMC2130(WRITE_FLAG|REG_COOLCONF,   0x0004E000UL);
+    
 }
 
 void nBlock_STEPPER::stop(void) {
