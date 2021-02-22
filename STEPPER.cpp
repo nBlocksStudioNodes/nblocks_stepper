@@ -44,12 +44,16 @@ void nBlock_STEPPER::endFrame(void){
 		buf[0] = Value1;
 		switch (buf[0]) {
 			case 0:					// stop uncoditionally
-				_state = 0;
-				stop();
+                if(_motion != MOTIONSTOP){
+                    _state = 0;
+                    stop();
+                }
 				break;
 			case 0x30:				// stop uncoditionally
-				_state = 0;
-				stop();
+                if(_motion != MOTIONSTOP){
+                    _state = 0;
+                    stop();
+                }
 				break;				
 			case 1:
 				if ((_state == 0) & (_motion != MOTIONSTOP)){	//move right only if is in stop
@@ -65,12 +69,16 @@ void nBlock_STEPPER::endFrame(void){
 					}
 				break;
 			case 2:
-                _motion = MOTIONCOMPLETE;
-                _state = 2;	
+                if (_motion != MOTIONSTOP){
+                    _motion = MOTIONCOMPLETE;
+                    _state = 2;	
+                }
 				break; 
 			case 32:
-                _motion = MOTIONCOMPLETE;
-                _state = 2;	
+                if (_motion != MOTIONSTOP){
+                    _motion = MOTIONCOMPLETE;
+                    _state = 2;	
+                }
 				break;                                 				
 			case 3:
 				if ((_state == 2) & (_motion != MOTIONSTOP)) {	//turn left only if moving right
@@ -106,6 +114,7 @@ void nBlock_STEPPER::endFrame(void){
     if(_motion == MOTIONSTOP) {
         output[0] = stopPosition;
         available[0] = 1;
+        _motion = MOTIONIDLE;
     }
 }
 
