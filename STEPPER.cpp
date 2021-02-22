@@ -53,7 +53,8 @@ void nBlock_STEPPER::endFrame(void){
 				break;				
 			case 1:
 				if ((_state == 0) & (_motion != MOTIONSTOP)){	//move right only if is in stop
-					_state = 1;
+					wait_us(1000000);
+                    _state = 1;
 					turnRight();
 					}
 				break;
@@ -62,26 +63,34 @@ void nBlock_STEPPER::endFrame(void){
 					_state = 1;
 					turnRight();
 					}
-				break;				
+				break;
 			case 2:
-				if ((_state == 1) & (_motion != MOTIONSTOP)) {	//turn left only if moving right
-					_state = 2;
+                _motion = MOTIONCOMPLETE;
+                _state = 2;	
+				break; 
+			case 32:
+                _motion = MOTIONCOMPLETE;
+                _state = 2;	
+				break;                                 				
+			case 3:
+				if ((_state == 2) & (_motion != MOTIONSTOP)) {	//turn left only if moving right
+                    _state = 3;
 					turnLeft();
 					}
 				break;
-			case 0x32:
-				if (_state == 1){	//turn left only if moving right
-					_state = 2;
+			case 0x33:
+				if (_state == 2){	//turn left only if moving right
+					_state = 3;
 					turnLeft();
 					}
 				break;				
-			case 3:					// brake unconditionally
+			case 4:					// brake unconditionally
 				brake();
 				break;
-			case 0x33:				// brake unconditionally
+			case 0x34:				// brake unconditionally
 				brake();
 				break;				
-			case 4:					// Allow Motion
+			case 5:					// Allow Motion
 				_motion = MOTIONHALT;
 				break;
 
@@ -150,7 +159,7 @@ void nBlock_STEPPER::turnLeft(void) {
     _en  = 0;
     _dir = 0;
     SteppingCounter = 0;  // 1000000/50KHz = 20sec of movement if the fastest speed is used
-    if(_motion == MOTIONSTOP) _motion = MOTIONACTIVE;     
+    if(_motion != MOTIONSTOP) _motion = MOTIONACTIVE;     
 }
  
 void nBlock_STEPPER::turnRight(void) {
